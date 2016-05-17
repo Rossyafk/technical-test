@@ -1,9 +1,7 @@
 package com.rizandoelrizo.ij.server.model;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -12,6 +10,22 @@ import java.util.Set;
  * This class is Immutable.
  */
 public class User {
+
+    public enum Attribute {
+        NAME("name"),
+        PASSWORD("password"),
+        ROLES("roles");
+
+        private final String name;
+
+        Attribute(String name) {
+            this.name = name;
+        }
+
+        public String getName() {
+            return name;
+        }
+    }
 
     private final long id;
 

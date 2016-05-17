@@ -6,9 +6,11 @@ import com.rizandoelrizo.ij.server.repository.InMemoryUserRepository;
 import com.rizandoelrizo.ij.server.repository.UserRepository;
 import com.rizandoelrizo.ij.server.service.AuthorizationService;
 import com.rizandoelrizo.ij.server.service.RoleAuthorizationService;
+import com.rizandoelrizo.ij.server.service.UserSerializationService;
+import com.rizandoelrizo.ij.server.service.UserSerializationServiceImpl;
 import com.rizandoelrizo.ij.server.service.UserService;
-import com.rizandoelrizo.ij.server.service.DefaultUserService;
-import com.rizandoelrizo.ij.server.web.controller.RestHandler;
+import com.rizandoelrizo.ij.server.service.UserServiceImpl;
+import com.rizandoelrizo.ij.server.web.handler.rest.RestHandler;
 import com.rizandoelrizo.ij.server.web.security.RestAuthentication;
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpServer;
@@ -27,20 +29,20 @@ public class HttpServerApp {
 	public static void main(String[] args) throws Exception {
 		// Context
 		UserRepository userRepository = new InMemoryUserRepository(Optional.of(1L));
-		UserService userService = new DefaultUserService(userRepository);
+		UserService userService = new UserServiceImpl(userRepository);
 		AuthorizationService authorizationService = new RoleAuthorizationService(userRepository);
+		UserSerializationService userSerializationService = new UserSerializationServiceImpl();
 
 		// Initialization
 		userRepository.save(User.of("Pepito", "pepito", Optional.of(Collections.singleton(Role.ADMIN))));
-		userRepository.save(User.of("Paquita", "paquita", Optional.empty()));
-
+		userRepository.save(User.of("Paquita Tést", "paquita", Optional.empty()));
 
 		int port = 8000;
 		HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
 		LOG.log(Level.INFO, "Listening on address: {0}:{1}",
 				new Object[]{server.getAddress().getHostName(), String.valueOf(port)});
 
-		HttpContext restContext = server.createContext("/api", new RestHandler(userService, authorizationService));
+		HttpContext restContext = server.createContext("/api/users", new RestHandler(userService, authorizationService, userSerializationService));
 		restContext.setAuthenticator(new RestAuthentication("REST"));
 
 		server.setExecutor(Executors.newCachedThreadPool());

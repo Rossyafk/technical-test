@@ -6,11 +6,11 @@ import com.rizandoelrizo.ij.server.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
 
-public class DefaultUserService implements UserService {
+public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
 
-    public DefaultUserService(UserRepository userRepository) {
+    public UserServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
@@ -22,6 +22,11 @@ public class DefaultUserService implements UserService {
     @Override
     public Optional<User> findByName(String username) {
         return userRepository.findByName(username);
+    }
+
+    @Override
+    public User save(User user) {
+        return userRepository.save(user);
     }
 
 }
