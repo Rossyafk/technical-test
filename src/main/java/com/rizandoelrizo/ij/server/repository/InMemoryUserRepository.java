@@ -69,12 +69,48 @@ public class InMemoryUserRepository implements UserRepository {
     public Optional<User> findByName(String username) {
         lock.readLock().lock();
 
-        Optional<User> optionalSearchedUser = users.values().stream()
+        Optional<User> foundUser = users.values().stream()
                 .filter(user -> user.getName().equals(username))
                 .findFirst();
 
         lock.readLock().unlock();
-        return optionalSearchedUser;
+        return foundUser;
+    }
+
+    /**
+     * Returns a user with the specified id.
+     * @param userId id of the user.
+     * @return Optional instance of the specified user.
+     */
+    @Override
+    public Optional<User> findById(Long userId) {
+        lock.readLock().lock();
+
+        Optional<User> foundUser = Optional.ofNullable(users.get(userId));
+
+        lock.readLock().unlock();
+        return foundUser;
+    }
+
+    @Override
+    public Optional<User> replaceById(Long userId, User user) {
+        lock.writeLock().lock();
+
+        User userToMerge = User.of(userId, user);
+        Optional<User> replacedUser = Optional.ofNullable(users.replace(userId, userToMerge));
+
+        lock.writeLock().unlock();
+        return replacedUser;
+    }
+
+    @Override
+    public Optional<User> deleteById(Long userId) {
+        lock.writeLock().lock();
+
+        Optional<User> deletedUser = Optional.ofNullable(users.remove(userId));
+
+        lock.writeLock().unlock();
+        return deletedUser;
     }
 
 }

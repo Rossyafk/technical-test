@@ -10,6 +10,7 @@ import com.rizandoelrizo.ij.server.service.UserSerializationService;
 import com.rizandoelrizo.ij.server.service.UserSerializationServiceImpl;
 import com.rizandoelrizo.ij.server.service.UserService;
 import com.rizandoelrizo.ij.server.service.UserServiceImpl;
+import com.rizandoelrizo.ij.server.web.handler.rest.UserHandler;
 import com.rizandoelrizo.ij.server.web.handler.rest.UsersHandler;
 import com.rizandoelrizo.ij.server.web.security.RestAuthentication;
 import com.sun.net.httpserver.HttpContext;
@@ -32,6 +33,8 @@ public class HttpServerApp {
 		UserService userService = new UserServiceImpl(userRepository);
 		AuthorizationService authorizationService = new RoleAuthorizationService(userRepository);
 		UserSerializationService userSerializationService = new UserSerializationServiceImpl();
+		UsersHandler usersHandler = new UsersHandler(userService, authorizationService, userSerializationService);
+		UserHandler userHandler = new UserHandler(userService, authorizationService, userSerializationService);
 
 		// Initialization
 		userRepository.save(User.of("Pepito", "pepito", Optional.of(Collections.singleton(Role.ADMIN))));
@@ -42,8 +45,11 @@ public class HttpServerApp {
 		LOG.log(Level.INFO, "Listening on address: {0}:{1}",
 				new Object[]{server.getAddress().getHostName(), String.valueOf(port)});
 
-		HttpContext restContext = server.createContext("/api/users", new UsersHandler(userService, authorizationService, userSerializationService));
-		restContext.setAuthenticator(new RestAuthentication("REST"));
+		HttpContext usersContext = server.createContext("/users", usersHandler);
+		usersContext.setAuthenticator(new RestAuthentication("REST"));
+
+		HttpContext userContext = server.createContext("/api/user", userHandler);
+		userContext.setAuthenticator(new RestAuthentication("REST"));
 
 		server.setExecutor(Executors.newCachedThreadPool());
 		server.start();

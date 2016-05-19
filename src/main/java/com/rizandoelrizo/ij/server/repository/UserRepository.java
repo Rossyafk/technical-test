@@ -30,4 +30,15 @@ public interface UserRepository {
      */
     Optional<User> findByName(String username);
 
+    /**
+     * Returns a user with the specified id.
+     * @param userId id of the user.
+     * @return Optional instance of the specified user.
+     */
+    Optional<User> findById(Long userId);
+
+    Optional<User> replaceById(Long userId, User user);
+
+    Optional<User> deleteById(Long userId);
+
 }
