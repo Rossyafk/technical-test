@@ -10,7 +10,7 @@ import com.rizandoelrizo.ij.server.service.UserSerializationService;
 import com.rizandoelrizo.ij.server.service.UserSerializationServiceImpl;
 import com.rizandoelrizo.ij.server.service.UserService;
 import com.rizandoelrizo.ij.server.service.UserServiceImpl;
-import com.rizandoelrizo.ij.server.web.handler.rest.RestHandler;
+import com.rizandoelrizo.ij.server.web.handler.rest.UsersHandler;
 import com.rizandoelrizo.ij.server.web.security.RestAuthentication;
 import com.sun.net.httpserver.HttpContext;
 import com.sun.net.httpserver.HttpServer;
@@ -42,7 +42,7 @@ public class HttpServerApp {
 		LOG.log(Level.INFO, "Listening on address: {0}:{1}",
 				new Object[]{server.getAddress().getHostName(), String.valueOf(port)});
 
-		HttpContext restContext = server.createContext("/api/users", new RestHandler(userService, authorizationService, userSerializationService));
+		HttpContext restContext = server.createContext("/api/users", new UsersHandler(userService, authorizationService, userSerializationService));
 		restContext.setAuthenticator(new RestAuthentication("REST"));
 
 		server.setExecutor(Executors.newCachedThreadPool());
