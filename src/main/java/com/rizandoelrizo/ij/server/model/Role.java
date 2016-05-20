@@ -1,11 +1,11 @@
 package com.rizandoelrizo.ij.server.model;
 
 /**
- * Created by Oscar on 12/05/2016.
+ * The different roles that and user can have.
  */
 public enum Role {
     ADMIN,
-    ROLE_1,
-    ROLE_2,
-    ROLE_3
+    PAGE_1,
+    PAGE_2,
+    PAGE_3
 }

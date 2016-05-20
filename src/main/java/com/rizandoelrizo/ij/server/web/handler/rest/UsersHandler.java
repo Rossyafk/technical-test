@@ -6,6 +6,7 @@ import com.rizandoelrizo.ij.server.model.User;
 import com.rizandoelrizo.ij.server.service.AuthorizationService;
 import com.rizandoelrizo.ij.server.service.UserSerializationService;
 import com.rizandoelrizo.ij.server.service.UserService;
+import com.rizandoelrizo.ij.server.service.exception.UnsupportedUserSerializationException;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpPrincipal;
@@ -48,7 +49,10 @@ public class UsersHandler extends RestHandler {
     public void handle(HttpExchange exchange) {
         try {
             service(exchange);
-        } catch (Exception e) {
+        } catch (IOException e) {
+            e.printStackTrace();
+
+        } catch (UnsupportedUserSerializationException e) {
             e.printStackTrace();
 
         } finally {
@@ -56,7 +60,7 @@ public class UsersHandler extends RestHandler {
         }
     }
 
-    private void service(HttpExchange exchange) throws IOException {
+    private void service(HttpExchange exchange) throws IOException, UnsupportedUserSerializationException {
         switch (HttpMethod.valueOf(exchange.getRequestMethod())) {
             case GET:
                 doGet(exchange);
@@ -84,7 +88,8 @@ public class UsersHandler extends RestHandler {
         exchange.close();
     }
 
-    private void doProtectedPost(HttpExchange exchange, Role expectedRole) throws IOException {
+    private void doProtectedPost(HttpExchange exchange, Role expectedRole) throws IOException,
+            UnsupportedUserSerializationException {
         HttpPrincipal principal = exchange.getPrincipal();
         if (authorizationService.isUserInRole(principal.getUsername(), expectedRole)) {
             doPost(exchange);
@@ -93,7 +98,7 @@ public class UsersHandler extends RestHandler {
         }
     }
 
-    private void doPost(HttpExchange exchange) throws IOException {
+    private void doPost(HttpExchange exchange) throws IOException, UnsupportedUserSerializationException {
         if (!containsContentType(exchange, FORM_URL_ENCODED)) {
             returnUnsupportedMediaType(exchange);
         } else {

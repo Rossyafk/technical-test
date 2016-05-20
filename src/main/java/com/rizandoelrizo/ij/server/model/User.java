@@ -1,9 +1,12 @@
 package com.rizandoelrizo.ij.server.model;
 
+import java.util.Base64;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Represents a user in the app.
@@ -35,15 +38,15 @@ public class User {
 
     private final Set<Role> roles = new HashSet<>();
 
-    private User(String name, String password, Optional<Set<Role>> roles) {
+    private User(String name, String password, Set<Role> roles) {
         this(0L, name, password, roles);
     }
 
-    private User(long id, String name, String password, Optional<Set<Role>> roles) {
+    private User(long id, String name, String password, Set<Role> roles) {
         this.id = id;
         this.name = name;
         this.password = password;
-        roles.ifPresent(optionalRoles -> this.roles.addAll(optionalRoles));
+        this.roles.addAll(roles);
     }
 
     public long getId() {
@@ -62,12 +65,48 @@ public class User {
         return Collections.unmodifiableSet(roles);
     }
 
-    public static User of(String name, String password, Optional<Set<Role>> roles) {
-        return new User(name, password, roles);
+    public static User of(String name, String password, Set<Role> roles) {
+        String validatedName = validateAndProcessStringValue(name);
+        String validatedPassword = validateAndProcessStringValue(password);
+        Set<Role> validatesRoles = Optional.ofNullable(roles).orElseThrow(IllegalArgumentException::new);
+        String encodedPassword = Base64.getEncoder().encodeToString(validatedPassword.getBytes(UTF_8));
+        return new User(validatedName, encodedPassword, validatesRoles);
     }
 
     public static User of(long id, User other) {
-        return new User(id, other.getName(), other.getPassword(), Optional.of(other.getRoles()));
+        return new User(id, other.getName(), other.getPassword(), other.getRoles());
+    }
+
+    /**
+     * Checks if the user contains a specif role.
+     * @param expectedRole the role to check.
+     * @return true if the user has the role, false otherwise.
+     */
+    public boolean hasRole(Role expectedRole) {
+        return roles.stream()
+                .anyMatch(role -> role.equals(expectedRole));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        User user = (User) o;
+
+        if (id != user.id) return false;
+        if (name != null ? !name.equals(user.name) : user.name != null) return false;
+        if (password != null ? !password.equals(user.password) : user.password != null) return false;
+        return roles != null ? roles.equals(user.roles) : user.roles == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = (int) (id ^ (id >>> 32));
+        result = 31 * result + (name != null ? name.hashCode() : 0);
+        result = 31 * result + (password != null ? password.hashCode() : 0);
+        result = 31 * result + (roles != null ? roles.hashCode() : 0);
+        return result;
     }
 
     @Override
@@ -79,14 +118,11 @@ public class User {
                 '}';
     }
 
-    /**
-     * Checks if the user contains a specif role.
-     * @param expectedRole the role to check.
-     * @return true if the user has the role, false otherwise
-     */
-    public boolean hasRole(Role expectedRole) {
-        return roles.stream()
-                .anyMatch(role -> role.equals(expectedRole));
+    private static String validateAndProcessStringValue(String valueToCheck) {
+        return Optional.ofNullable(valueToCheck)
+                .map(String::trim)
+                .filter(nameToFilter -> !nameToFilter.isEmpty())
+                .orElseThrow(IllegalArgumentException::new);
     }
 
 }

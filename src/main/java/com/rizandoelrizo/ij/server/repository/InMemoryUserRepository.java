@@ -21,8 +21,8 @@ public class InMemoryUserRepository implements UserRepository {
 
     private final ReentrantReadWriteLock lock =  new ReentrantReadWriteLock();
 
-    public InMemoryUserRepository(Optional<Long> sequenceInitialValue) {
-        Long initialValue = sequenceInitialValue
+    public InMemoryUserRepository(Long sequenceInitialValue) {
+        Long initialValue = Optional.ofNullable(sequenceInitialValue)
                 .filter(value -> value >= 1L)
                 .orElse(1L);
         this.sequenceUserId = new AtomicLong(initialValue);

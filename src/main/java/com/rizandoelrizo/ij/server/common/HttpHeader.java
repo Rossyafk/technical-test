@@ -3,7 +3,9 @@ package com.rizandoelrizo.ij.server.common;
 public enum HttpHeader {
     CONTENT_TYPE("Content-Type"),
     ALLOW("Allow"),
-    LOCATION("Location");
+    LOCATION("Location"),
+    WWW_AUTHENTICATE("WWW-Authenticate"),
+    AUTHORIZATION("Authorization");
 
     private final String name;
 
