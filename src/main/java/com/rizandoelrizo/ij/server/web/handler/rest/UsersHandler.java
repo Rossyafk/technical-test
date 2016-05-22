@@ -57,7 +57,6 @@ public class UsersHandler extends AbstractBaseHandler {
         } catch (UnsupportedUserSerializationException e) {
             returnBadRequest(exchange);
         } catch (UserAlreadyExistsException e) {
-            e.printStackTrace();
             returnConflict(exchange);
         } catch (Exception e) {
             e.printStackTrace();

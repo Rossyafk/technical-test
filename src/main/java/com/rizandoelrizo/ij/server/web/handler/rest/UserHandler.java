@@ -77,6 +77,7 @@ public class UserHandler extends AbstractBaseHandler {
                 break;
             case DELETE:
                 doProtectedDelete(exchange, Role.ADMIN);
+                break;
             default:
                 returnMethodNotAllowed(exchange, allowedHttpMethods);
         }
@@ -116,7 +117,7 @@ public class UserHandler extends AbstractBaseHandler {
 
             Headers responseHeaders = exchange.getResponseHeaders();
             responseHeaders.add(CONTENT_TYPE.getName(), TEXT_PLAIN_UTF8.getName());
-            responseHeaders.add(LOCATION.getName(), getAbsoluteUrlFor(exchange, puttedUser.getId()));
+            responseHeaders.add(LOCATION.getName(), getAbsoluteUrlFor(exchange));
             exchange.sendResponseHeaders(HTTP_CREATED, response.length);
 
             OutputStream os = exchange.getResponseBody();

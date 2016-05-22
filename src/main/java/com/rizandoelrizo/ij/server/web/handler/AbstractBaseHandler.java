@@ -92,9 +92,16 @@ public abstract class AbstractBaseHandler implements HttpHandler {
         return "http://" + host + uri + "/" + newId;
     }
 
+    protected String getAbsoluteUrlFor(HttpExchange exchange) {
+        Headers requestHeaders = exchange.getRequestHeaders();
+        String host = requestHeaders.getFirst(HOST.getName());
+        String uri = exchange.getRequestURI().getPath();
+        return "http://" + host + uri;
+    }
+
     protected long getEntityIdFrom(HttpExchange exchange) {
         String path = exchange.getRequestURI().getPath();
-        return Long.valueOf(path.substring(path.lastIndexOf('/')));
+        return Long.valueOf(path.substring(path.lastIndexOf('/') + 1));
     }
 
 }
