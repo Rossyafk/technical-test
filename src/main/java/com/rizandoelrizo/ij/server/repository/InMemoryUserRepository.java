@@ -11,7 +11,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 import java.util.stream.Collectors;
 
 /**
- *  In memory {@link User} Repository.
+ *  In memory implementation of a {@link User} Repository.
  */
 public class InMemoryUserRepository implements UserRepository {
 
@@ -30,7 +30,7 @@ public class InMemoryUserRepository implements UserRepository {
 
     /**
      * Saves a given user
-     * @param userToSave {@link User} to save.
+     * @param userToSave {@link User} to checkDuplicatedAndSave.
      * @return a saved user with an unique id.
      */
     @Override
@@ -61,9 +61,9 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     /**
-     * Returns a user with the specified name.
+     * Returns a user with the given name.
      * @param username name of the user.
-     * @return Optional instance of the specified user.
+     * @return Optional instance of the given user.
      */
     @Override
     public Optional<User> findByName(String username) {
@@ -78,9 +78,9 @@ public class InMemoryUserRepository implements UserRepository {
     }
 
     /**
-     * Returns a user with the specified id.
+     * Returns a user with the given id.
      * @param userId id of the user.
-     * @return Optional instance of the specified user.
+     * @return Optional instance of the given user.
      */
     @Override
     public Optional<User> findById(Long userId) {
@@ -92,6 +92,12 @@ public class InMemoryUserRepository implements UserRepository {
         return foundUser;
     }
 
+    /**
+     * Replaces a user with the given id.
+     * @param userId id of the user.
+     * @param user replacement user.
+     * @return Optional instance of the replaced user.
+     */
     @Override
     public Optional<User> replaceById(Long userId, User user) {
         lock.writeLock().lock();
@@ -103,6 +109,11 @@ public class InMemoryUserRepository implements UserRepository {
         return replacedUser;
     }
 
+    /**
+     * Deletes a user with the given id.
+     * @param userId id of the user
+     * @return Optional instance of the deleted user.
+     */
     @Override
     public Optional<User> deleteById(Long userId) {
         lock.writeLock().lock();

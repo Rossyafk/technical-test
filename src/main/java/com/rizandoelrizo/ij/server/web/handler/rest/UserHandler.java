@@ -14,7 +14,6 @@ import com.sun.net.httpserver.HttpPrincipal;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URI;
 
 import static com.rizandoelrizo.ij.server.common.HttpHeader.CONTENT_TYPE;
 import static com.rizandoelrizo.ij.server.common.HttpHeader.LOCATION;
@@ -53,13 +52,11 @@ public class UserHandler extends RestHandler {
             service(exchange);
         } catch (UserNotFoundException e) {
             returnResourceNotFound(exchange);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-
         } catch (UnsupportedUserSerializationException e) {
+            returnBadRequest(exchange);
+        } catch (Exception e) {
             e.printStackTrace();
-
+            returnInternalServerError(exchange);
         } finally {
             exchange.close();
         }
@@ -82,9 +79,7 @@ public class UserHandler extends RestHandler {
     }
 
     private void doGet(HttpExchange exchange) throws IOException, UserNotFoundException {
-        URI requestURI = exchange.getRequestURI();
-        Long userId = Long.valueOf(requestURI.getPath().replace("/api/users/", ""));
-        User user = userService.findById(userId);
+        User user = userService.findById(getEntityIdFrom(exchange));
         byte[] response = user.toString().getBytes(UTF_8);
 
         Headers responseHeaders = exchange.getResponseHeaders();
@@ -112,20 +107,16 @@ public class UserHandler extends RestHandler {
         if (!containsContentType(exchange, FORM_URL_ENCODED)) {
             returnUnsupportedMediaType(exchange);
         } else {
-            URI requestURI = exchange.getRequestURI();
-            Long userId = Long.valueOf(requestURI.getPath().replace("/api/users/", ""));
-
             String requestBody = readRequestBody(exchange);
             User puttedUser = userSerializationService.deserialize(requestBody);
-
-            User replacedUser = userService.replaceById(userId, puttedUser);
+            User replacedUser = userService.replaceById(getEntityIdFrom(exchange), puttedUser);
             byte[] response = replacedUser.toString().getBytes(UTF_8);
 
             Headers responseHeaders = exchange.getResponseHeaders();
             responseHeaders.add(CONTENT_TYPE.getName(), TEXT_PLAIN_UTF8.getName());
-            responseHeaders.add(LOCATION.getName(), "/api/users/" + replacedUser.getId());
-
+            responseHeaders.add(LOCATION.getName(), getAbsoluteUrlFor(exchange, puttedUser.getId()));
             exchange.sendResponseHeaders(HTTP_CREATED, response.length);
+
             OutputStream os = exchange.getResponseBody();
             os.write(response);
             os.close();
@@ -144,9 +135,7 @@ public class UserHandler extends RestHandler {
     }
 
     private void doDelete(HttpExchange exchange) throws IOException, UserNotFoundException {
-        URI requestURI = exchange.getRequestURI();
-        Long userId = Long.valueOf(requestURI.getPath().replace("/api/users/", ""));
-        userService.deleteById(userId);
+        userService.deleteById(getEntityIdFrom(exchange));
         exchange.sendResponseHeaders(HTTP_OK, -1);
         exchange.close();
     }

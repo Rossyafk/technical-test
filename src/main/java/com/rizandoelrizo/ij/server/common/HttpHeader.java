@@ -1,11 +1,15 @@
 package com.rizandoelrizo.ij.server.common;
 
+/**
+ * Common HTTP headers.
+ */
 public enum HttpHeader {
     CONTENT_TYPE("Content-Type"),
     ALLOW("Allow"),
     LOCATION("Location"),
     WWW_AUTHENTICATE("WWW-Authenticate"),
-    AUTHORIZATION("Authorization");
+    AUTHORIZATION("Authorization"),
+    HOST("Host");
 
     private final String name;
 
@@ -16,5 +20,4 @@ public enum HttpHeader {
     public String getName() {
         return name;
     }
-
 }

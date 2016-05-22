@@ -12,7 +12,7 @@ public interface UserRepository {
 
     /**
      * Saves a given user.
-     * @param userToSave {@link User} to save.
+     * @param userToSave {@link User} to checkDuplicatedAndSave.
      * @return the saved user.
      */
     User save(User userToSave);
@@ -24,21 +24,32 @@ public interface UserRepository {
     List<User> findAll();
 
     /**
-     * Returns a user with the specified name.
+     * Returns a user with the given name.
      * @param username name of the user.
-     * @return Optional instance of the specified user.
+     * @return Optional instance of the given user.
      */
     Optional<User> findByName(String username);
 
     /**
-     * Returns a user with the specified id.
+     * Returns a user with the given id.
      * @param userId id of the user.
-     * @return Optional instance of the specified user.
+     * @return Optional instance of the given user.
      */
     Optional<User> findById(Long userId);
 
+    /**
+     * Replaces a user with the given id.
+     * @param userId id of the user.
+     * @param user replacement user.
+     * @return Optional instance of the replaced user.
+     */
     Optional<User> replaceById(Long userId, User user);
 
+    /**
+     * Deletes a user with the given id.
+     * @param userId id of the user
+     * @return Optional instance of the deleted user.
+     */
     Optional<User> deleteById(Long userId);
 
 }

@@ -14,8 +14,12 @@ import java.util.stream.Stream;
 
 import static com.rizandoelrizo.ij.server.common.HttpHeader.ALLOW;
 import static com.rizandoelrizo.ij.server.common.HttpHeader.CONTENT_TYPE;
+import static com.rizandoelrizo.ij.server.common.HttpHeader.HOST;
 import static java.net.HttpURLConnection.HTTP_BAD_METHOD;
+import static java.net.HttpURLConnection.HTTP_BAD_REQUEST;
+import static java.net.HttpURLConnection.HTTP_CONFLICT;
 import static java.net.HttpURLConnection.HTTP_FORBIDDEN;
+import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
 import static java.net.HttpURLConnection.HTTP_NOT_FOUND;
 import static java.net.HttpURLConnection.HTTP_UNSUPPORTED_TYPE;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -55,6 +59,18 @@ public abstract class RestHandler implements HttpHandler {
         returnWithStatusCode(exchange, HTTP_UNSUPPORTED_TYPE);
     }
 
+    protected void returnBadRequest(HttpExchange exchange) {
+        returnWithStatusCode(exchange, HTTP_BAD_REQUEST);
+    }
+
+    protected void returnInternalServerError(HttpExchange exchange) {
+        returnWithStatusCode(exchange, HTTP_INTERNAL_ERROR);
+    }
+
+    protected void returnConflict(HttpExchange exchange) {
+        returnWithStatusCode(exchange, HTTP_CONFLICT);
+    }
+
     protected void returnResourceNotFound(HttpExchange exchange) {
         returnWithStatusCode(exchange, HTTP_NOT_FOUND);
     }
@@ -68,6 +84,18 @@ public abstract class RestHandler implements HttpHandler {
         } finally {
             exchange.close();
         }
+    }
+
+    protected String getAbsoluteUrlFor(HttpExchange exchange, long newId) {
+        Headers requestHeaders = exchange.getRequestHeaders();
+        String host = requestHeaders.getFirst(HOST.getName());
+        String uri = exchange.getRequestURI().getPath();
+        return "http://" + host + uri + "/" + newId;
+    }
+
+    protected long getEntityIdFrom(HttpExchange exchange) {
+        String path = exchange.getRequestURI().getPath();
+        return Long.valueOf(path.substring(path.lastIndexOf('/')));
     }
 
 }

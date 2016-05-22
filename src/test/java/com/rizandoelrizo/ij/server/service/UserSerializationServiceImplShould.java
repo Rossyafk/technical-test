@@ -135,12 +135,6 @@ public class UserSerializationServiceImplShould {
         sut.deserialize("name=Test&password= ");
     }
 
-
-    @Test
-    public void serialize() throws Exception {
-
-    }
-
     private User parsedUserFrom(String decodedUser) throws UnsupportedEncodingException,
             UnsupportedUserSerializationException {
         return sut.deserialize(URLEncoder.encode(decodedUser, UTF_8.name()));

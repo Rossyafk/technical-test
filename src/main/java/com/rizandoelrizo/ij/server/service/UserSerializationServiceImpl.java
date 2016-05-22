@@ -16,18 +16,32 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static com.rizandoelrizo.ij.server.common.MimeType.FORM_URL_ENCODED;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.Collectors.toSet;
 
+/**
+ * Default implementation of the UserSerializationService.
+ */
 public class UserSerializationServiceImpl implements UserSerializationService {
 
+    private static final String ATTRIBUTE_SEPARATOR = "&";
+
+    private static final String PAIR_SEPARATOR = "=";
+
+    /**
+     * Deserialize a given URL Encoded string into the corresponding user instance.
+     * @param urlEncodedBody the URL Encoded string.
+     * @return the corresponding user instance.
+     * @throws UnsupportedUserSerializationException if the syntax of the URL Encoded string is wrong.
+     */
     @Override
-    public User deserialize(String requestBody) throws UnsupportedUserSerializationException {
-        String validBody = Optional.ofNullable(requestBody).orElseThrow(UnsupportedUserSerializationException::new);
-        String decodedBody = getDecodedBody(validBody);
-        Map<User.Attribute, List<String>> bodyParams = getAttributeListMap(decodedBody);
+    public User deserialize(String urlEncodedBody) throws UnsupportedUserSerializationException {
+        String validBody = Optional.ofNullable(urlEncodedBody).orElseThrow(UnsupportedUserSerializationException::new);
+        String urlDecodedBody = getUrlDecodedBody(validBody);
+        Map<User.Attribute, List<String>> bodyParams = getBodyParamsMap(urlDecodedBody);
 
         Optional<String> parsedName = Optional.empty();
         Optional<String> parsedPassword = Optional.empty();
@@ -52,28 +66,23 @@ public class UserSerializationServiceImpl implements UserSerializationService {
         return getUser(name, password, roles);
     }
 
-    @Override
-    public String serialize(User user) {
-        return null;
-    }
-
-    private String getDecodedBody(String requestBody) throws UnsupportedUserSerializationException {
+    private String getUrlDecodedBody(String urlEncodedBody) throws UnsupportedUserSerializationException {
         String decodedBody;
         try {
-            decodedBody = URLDecoder.decode(requestBody, UTF_8.name());
+            decodedBody = URLDecoder.decode(urlEncodedBody, UTF_8.name());
         } catch (UnsupportedEncodingException e) {
-            throw customException(e);
+            throw exception("Invalid URL Encoded body", e);
         }
         return decodedBody;
     }
 
-    private Map<User.Attribute, List<String>> getAttributeListMap(String decodedBody) throws UnsupportedUserSerializationException {
+    private Map<User.Attribute, List<String>> getBodyParamsMap(String urlDecodedBody) throws UnsupportedUserSerializationException {
         Map<User.Attribute, List<String>> bodyParams;
         try {
-            bodyParams = Stream.of(decodedBody)
-                    .map(body -> body.split("&"))
+            bodyParams = Stream.of(urlDecodedBody)
+                    .map(body -> body.split(ATTRIBUTE_SEPARATOR))
                     .flatMap(Stream::of)
-                    .map(pair -> pair.split("="))
+                    .map(attribute -> attribute.split(PAIR_SEPARATOR))
                     .filter(pairArray -> pairArray.length > 1)
                     .collect(toMap(
                             pairArray -> User.Attribute.valueOf(pairArray[0].toUpperCase()),
@@ -82,7 +91,7 @@ public class UserSerializationServiceImpl implements UserSerializationService {
                                     .collect(toList())
                     ));
         }catch (IllegalArgumentException e) {
-            throw customException(e);
+            throw exception(String.format("Invalid '%s' syntax", FORM_URL_ENCODED.getName()), e);
         }
         return bodyParams;
     }
@@ -94,7 +103,7 @@ public class UserSerializationServiceImpl implements UserSerializationService {
                     .map(rawRole -> Role.valueOf(rawRole.toUpperCase()))
                     .collect(toSet()));
         }catch (IllegalArgumentException e) {
-            throw customException(e);
+            throw exception("Invalid 'Role' value", e);
         }
         return roles;
     }
@@ -104,15 +113,13 @@ public class UserSerializationServiceImpl implements UserSerializationService {
         try {
             user = User.of(name, password, roles);
         } catch (IllegalArgumentException e) {
-            throw customException(e);
+            throw exception("Invalid 'User' attributes", e);
         }
         return user;
     }
 
-    private UnsupportedUserSerializationException customException(Throwable suppressedException) {
-        UnsupportedUserSerializationException exception = new UnsupportedUserSerializationException();
-        exception.addSuppressed(suppressedException);
-        return exception;
+    private UnsupportedUserSerializationException exception(String message, Throwable cause) {
+        return new UnsupportedUserSerializationException(message, cause);
     }
 
 }

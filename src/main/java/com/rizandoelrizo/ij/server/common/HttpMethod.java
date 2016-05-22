@@ -1,5 +1,8 @@
 package com.rizandoelrizo.ij.server.common;
 
+/**
+ * Common HTTP methods.
+ */
 public enum HttpMethod {
     GET,
     POST,
@@ -7,5 +10,6 @@ public enum HttpMethod {
     DELETE,
     HEAD,
     OPTIONS,
-    TRACE;
+    TRACE,
+    PATCH
 }
