@@ -10,10 +10,12 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Represents a user in the app.
- * This class is Immutable.
  */
 public class User {
 
+    /**
+     * Attributes of the User class, useful for the serialization process.
+     */
     public enum Attribute {
         NAME("name"),
         PASSWORD("password"),
@@ -30,10 +32,17 @@ public class User {
         }
     }
 
+    /**
+     * Id of the user. Incremented by the system.
+     */
     private final long id;
 
     private final String name;
 
+    /**
+     * Password of the user. Base64 encoded, just a reminder to not to store the password in clear.
+     * (Another approach should be used).
+     */
     private final String password;
 
     private final Set<Role> roles = new HashSet<>();
@@ -68,9 +77,9 @@ public class User {
     public static User of(String name, String password, Set<Role> roles) {
         String validatedName = validateAndProcessStringValue(name);
         String validatedPassword = validateAndProcessStringValue(password);
-        Set<Role> validatesRoles = Optional.ofNullable(roles).orElseThrow(IllegalArgumentException::new);
+        Optional.ofNullable(roles).orElseThrow(IllegalArgumentException::new);
         String encodedPassword = Base64.getEncoder().encodeToString(validatedPassword.getBytes(UTF_8));
-        return new User(validatedName, encodedPassword, validatesRoles);
+        return new User(validatedName, encodedPassword, roles);
     }
 
     public static User of(long id, User other) {
