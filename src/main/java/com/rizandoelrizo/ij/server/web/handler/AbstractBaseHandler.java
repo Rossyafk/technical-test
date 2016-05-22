@@ -1,4 +1,4 @@
-package com.rizandoelrizo.ij.server.web.handler.rest;
+package com.rizandoelrizo.ij.server.web.handler;
 
 import com.rizandoelrizo.ij.server.common.HttpMethod;
 import com.rizandoelrizo.ij.server.common.MimeType;
@@ -27,7 +27,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 /**
  * Base handler for specific REST handlers.
  */
-public abstract class RestHandler implements HttpHandler {
+public abstract class AbstractBaseHandler implements HttpHandler {
 
     protected String readRequestBody(HttpExchange exchange) throws IOException {
         try (BufferedReader buffer = new BufferedReader(new InputStreamReader(exchange.getRequestBody(), UTF_8))) {
@@ -80,7 +80,6 @@ public abstract class RestHandler implements HttpHandler {
             exchange.sendResponseHeaders(httpStatusCode, -1);
         } catch (IOException e) {
             e.printStackTrace();
-
         } finally {
             exchange.close();
         }

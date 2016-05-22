@@ -5,13 +5,15 @@ import com.rizandoelrizo.ij.server.model.User;
 import com.rizandoelrizo.ij.server.service.AuthorizationService;
 import com.rizandoelrizo.ij.server.service.UserSerializationService;
 import com.rizandoelrizo.ij.server.service.exception.UnsupportedUserSerializationException;
-import com.rizandoelrizo.ij.server.web.handler.rest.RestHandler;
+import com.rizandoelrizo.ij.server.web.handler.AbstractBaseHandler;
+import com.rizandoelrizo.ij.server.web.view.LoginSuccessView;
 import com.rizandoelrizo.ij.server.web.view.LoginView;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.regex.Pattern;
 
 import static com.rizandoelrizo.ij.server.common.HttpHeader.CONTENT_TYPE;
 import static com.rizandoelrizo.ij.server.common.HttpMethod.GET;
@@ -20,11 +22,17 @@ import static com.rizandoelrizo.ij.server.common.MimeType.FORM_URL_ENCODED;
 import static com.rizandoelrizo.ij.server.common.MimeType.TEXT_HTML_UTF8;
 import static java.net.HttpURLConnection.HTTP_OK;
 
-public class LoginHandler extends RestHandler{
+/**
+ * Handler to perform a login.
+ */
+public class LoginHandler extends AbstractBaseHandler {
+
+    public static final Pattern URL_PATTERN = Pattern.compile("/views/public/login");
 
     private final HttpMethod[] allowedHttpMethods = new HttpMethod[]{GET, POST};
 
     private final UserSerializationService userSerializationService;
+
     private final AuthorizationService authorizationService;
 
     public LoginHandler(UserSerializationService userSerializationService, AuthorizationService authorizationService) {
@@ -38,10 +46,10 @@ public class LoginHandler extends RestHandler{
             service(exchange);
         } catch (IOException e) {
             e.printStackTrace();
-
+            returnInternalServerError(exchange);
         } catch (UnsupportedUserSerializationException e) {
             e.printStackTrace();
-
+            returnBadRequest(exchange);
         } finally {
             exchange.close();
         }
@@ -79,24 +87,23 @@ public class LoginHandler extends RestHandler{
         } else {
             String requestBody = readRequestBody(exchange);
             User postedUser = userSerializationService.deserialize(requestBody);
+            Headers responseHeaders = exchange.getResponseHeaders();
+            responseHeaders.add(CONTENT_TYPE.getName(), TEXT_HTML_UTF8.getName());
+            exchange.sendResponseHeaders(HTTP_OK, 0);
+
             if (authorizationService.isValidCredential(postedUser)) {
-
+                LoginSuccessView loginView = new LoginSuccessView();
+                OutputStream os = exchange.getResponseBody();
+                loginView.writeTo(os);
+                os.close();
             } else {
-
+                LoginView loginView = new LoginView();
+                OutputStream os = exchange.getResponseBody();
+                loginView.writeTo(os);
+                os.close();
             }
-//            User savedUser = userService.checkDuplicatedAndSave(postedUser);
-//            byte[] response = savedUser.toString().getBytes(UTF_8);
-//
-//            Headers responseHeaders = exchange.getResponseHeaders();
-//            responseHeaders.add(CONTENT_TYPE.getName(), TEXT_PLAIN_UTF8.getName());
-//            responseHeaders.add(LOCATION.getName(), "/api/users/" + savedUser.getId());
-//
-//            exchange.sendResponseHeaders(HTTP_CREATED, response.length);
-//            OutputStream os = exchange.getResponseBody();
-//            os.write(response);
-//            os.close();
-//
-//            exchange.close();
+
+            exchange.close();
         }
 
     }

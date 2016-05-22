@@ -8,6 +8,7 @@ import com.rizandoelrizo.ij.server.service.UserSerializationService;
 import com.rizandoelrizo.ij.server.service.UserService;
 import com.rizandoelrizo.ij.server.service.exception.UnsupportedUserSerializationException;
 import com.rizandoelrizo.ij.server.service.exception.UserAlreadyExistsException;
+import com.rizandoelrizo.ij.server.web.handler.AbstractBaseHandler;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpPrincipal;
@@ -15,6 +16,7 @@ import com.sun.net.httpserver.HttpPrincipal;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static com.rizandoelrizo.ij.server.common.HttpHeader.CONTENT_TYPE;
 import static com.rizandoelrizo.ij.server.common.HttpHeader.LOCATION;
@@ -29,7 +31,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 /**
  * Handler for REST requests to "/api/users"
  */
-public class UsersHandler extends RestHandler {
+public class UsersHandler extends AbstractBaseHandler {
+
+    public static final Pattern URL_PATTERN = Pattern.compile("/api/users");
 
     private final HttpMethod[] allowedHttpMethods = new HttpMethod[]{GET, POST};
 
@@ -53,6 +57,7 @@ public class UsersHandler extends RestHandler {
         } catch (UnsupportedUserSerializationException e) {
             returnBadRequest(exchange);
         } catch (UserAlreadyExistsException e) {
+            e.printStackTrace();
             returnConflict(exchange);
         } catch (Exception e) {
             e.printStackTrace();
@@ -87,8 +92,6 @@ public class UsersHandler extends RestHandler {
         OutputStream os = exchange.getResponseBody();
         os.write(response);
         os.close();
-
-        exchange.close();
     }
 
     private void doProtectedPost(HttpExchange exchange, Role expectedRole) throws IOException,
@@ -119,8 +122,6 @@ public class UsersHandler extends RestHandler {
             OutputStream os = exchange.getResponseBody();
             os.write(response);
             os.close();
-
-            exchange.close();
         }
     }
 

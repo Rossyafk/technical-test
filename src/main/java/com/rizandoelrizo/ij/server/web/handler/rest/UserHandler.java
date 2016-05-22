@@ -8,12 +8,14 @@ import com.rizandoelrizo.ij.server.service.UserSerializationService;
 import com.rizandoelrizo.ij.server.service.UserService;
 import com.rizandoelrizo.ij.server.service.exception.UnsupportedUserSerializationException;
 import com.rizandoelrizo.ij.server.service.exception.UserNotFoundException;
+import com.rizandoelrizo.ij.server.web.handler.AbstractBaseHandler;
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpPrincipal;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.regex.Pattern;
 
 import static com.rizandoelrizo.ij.server.common.HttpHeader.CONTENT_TYPE;
 import static com.rizandoelrizo.ij.server.common.HttpHeader.LOCATION;
@@ -29,7 +31,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 /**
  * Handler for REST requests to "/api/users/{id}"
  */
-public class UserHandler extends RestHandler {
+public class UserHandler extends AbstractBaseHandler {
+
+    public static final Pattern URL_PATTERN = Pattern.compile("/api/users/(\\d{1,15}?)");
 
     private final HttpMethod[] allowedHttpMethods = new HttpMethod[]{GET, PUT, DELETE};
 
@@ -88,8 +92,6 @@ public class UserHandler extends RestHandler {
         OutputStream os = exchange.getResponseBody();
         os.write(response);
         os.close();
-
-        exchange.close();
     }
 
     private void doProtectedPut(HttpExchange exchange, Role expectedRole) throws IOException, UserNotFoundException,
@@ -120,8 +122,6 @@ public class UserHandler extends RestHandler {
             OutputStream os = exchange.getResponseBody();
             os.write(response);
             os.close();
-
-            exchange.close();
         }
     }
 
@@ -137,7 +137,6 @@ public class UserHandler extends RestHandler {
     private void doDelete(HttpExchange exchange) throws IOException, UserNotFoundException {
         userService.deleteById(getEntityIdFrom(exchange));
         exchange.sendResponseHeaders(HTTP_OK, -1);
-        exchange.close();
     }
 
 }

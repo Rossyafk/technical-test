@@ -10,20 +10,24 @@ import com.rizandoelrizo.ij.server.service.UserSerializationService;
 import com.rizandoelrizo.ij.server.service.UserSerializationServiceImpl;
 import com.rizandoelrizo.ij.server.service.UserService;
 import com.rizandoelrizo.ij.server.service.UserServiceImpl;
+import com.rizandoelrizo.ij.server.web.handler.FrontHandler;
 import com.rizandoelrizo.ij.server.web.handler.rest.UserHandler;
 import com.rizandoelrizo.ij.server.web.handler.rest.UsersHandler;
 import com.rizandoelrizo.ij.server.web.handler.view.LoginHandler;
 import com.rizandoelrizo.ij.server.web.security.RestAuthenticator;
-import com.sun.net.httpserver.HttpContext;
+import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toSet;
@@ -65,25 +69,32 @@ public class HttpServerApp {
 
 	private void init() throws IOException {
 		// Context
+		UserSerializationService userSerializationService = new UserSerializationServiceImpl();
+
 		UserRepository userRepository = new InMemoryUserRepository(1L);
 		UserService userService = new UserServiceImpl(userRepository);
+
 		AuthorizationService authorizationService = new AuthorizationServiceImpl(userRepository);
-		UserSerializationService userSerializationService = new UserSerializationServiceImpl();
+		RestAuthenticator restAuthenticator = new RestAuthenticator("REST", authorizationService);
+
 		UsersHandler usersHandler = new UsersHandler(userService, authorizationService, userSerializationService);
 		UserHandler userHandler = new UserHandler(userService, authorizationService, userSerializationService);
 		LoginHandler loginHandler = new LoginHandler(userSerializationService, authorizationService);
 
+		Map<Pattern, HttpHandler> restHandlerMappings = new HashMap<>();
+		restHandlerMappings.put(UsersHandler.URL_PATTERN, usersHandler);
+		restHandlerMappings.put(UserHandler.URL_PATTERN, userHandler);
+		FrontHandler frontHandlerRest = new FrontHandler(restHandlerMappings);
+
+		Map<Pattern, HttpHandler> viewHandlerMappings = new HashMap<>();
+		viewHandlerMappings.put(LoginHandler.URL_PATTERN, usersHandler);
+		FrontHandler frontHandlerView = new FrontHandler(viewHandlerMappings);
+
 		// Initialization
 		INITIAL_USERS.replaceAll(userRepository::save);
 
-		HttpContext usersContext = server.createContext("/users", usersHandler);
-		usersContext.setAuthenticator(new RestAuthenticator("REST", authorizationService));
-
-		HttpContext userContext = server.createContext("/api/user", userHandler);
-		userContext.setAuthenticator(new RestAuthenticator("REST", authorizationService));
-
-		HttpContext loginContext = server.createContext("/views/public/login", loginHandler);
-
+		server.createContext("/api", frontHandlerRest).setAuthenticator(restAuthenticator);
+		server.createContext("/views/public/login", loginHandler);
 		server.setExecutor(Executors.newCachedThreadPool());
 	}
 
