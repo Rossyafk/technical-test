@@ -66,9 +66,58 @@ Interact with the service / image using the usual compose commands and flags
 
 ## Structure
 
+The project is divided in several packages.
+
+The most important ones are:
+* 'model' package -> Model of the app.
+* 'repository' package -> Repositories of the app.
+* 'service' package -> Business and other useful services. 
+* 'web' package -> Handlers, Views and Authenticators
+
+The layout and name of the classes should be self explanatory.
+
 ## REST Api documentation
 
+The REST API behaviour has been designed inspired by the following 
+decision diagram:
+
+![HTTP headers status](https://rawgithub.com/for-GET/http-decision-diagram/master/httpdd.png)
+
+### cUrl examples
+
+* GET /api/users
+ `curl -v -u Admin:admin -X GET localhost:8000/api/users`
+ 
+* POST /api/users
+ `curl -v -u Admin:admin -d name=New -d password=new -d roles=ADMIN -X POST localhost:8000/api/users`
+ 
+* GET /api/users/{id}
+ `curl -v -u Admin:admin -X GET localhost:8000/api/users/1`
+ 
+* PUT /api/users/{id}
+ `curl -v -u Admin:admin -d name=Test -d password=test -d roles=ADMIN -X PUT localhost:8000/api/users/4`
+ 
+* DELETE /api/users/{id}
+ `curl -v -u Admin:admin -X DELETE localhost:8000/api/users/5`
+
+## Tests
+
+The project contains unit and integration test:
+* Unit Tests -> Classes with the suffix *Should
+* Integrations Tests -> Classes with the suffix *ITShould
+
+HttpURLConnection class is used as the  client for Integration testing.
+Tests use Junit, Mockito and Hamcrest.
+
+The method name of each test should give enough information to understand 
+what is being tested
+
 ## Improvements
+
+* Finish Views related to Roles from PAGE_1 to PAGE_3
+* Add more logs
+* Add concurrency tests
+
 
 
 
