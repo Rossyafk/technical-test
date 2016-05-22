@@ -22,11 +22,10 @@ import static java.util.stream.Collectors.toSet;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertThat;
 
-
 public class UserSerializationServiceImplShould {
 
     @Rule
-    public ExpectedException thrown= ExpectedException.none();
+    public ExpectedException thrown = ExpectedException.none();
 
     private UserSerializationService sut = new UserSerializationServiceImpl();
 

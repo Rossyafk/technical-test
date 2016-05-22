@@ -1,0 +1,6 @@
+version: '2'
+services:
+  technical-test-web:
+    image: technical-test
+    ports:
+      - "8000:8000"

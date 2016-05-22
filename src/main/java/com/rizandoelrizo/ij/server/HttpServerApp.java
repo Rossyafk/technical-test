@@ -60,7 +60,7 @@ public class HttpServerApp {
 	}
 
 	public void stop() {
-		this.server.stop(0);
+		this.server.stop(1);
 	}
 
 	private void init() throws IOException {
