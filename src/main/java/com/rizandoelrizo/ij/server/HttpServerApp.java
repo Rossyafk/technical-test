@@ -44,8 +44,8 @@ public class HttpServerApp {
 	static {
 		INITIAL_USERS.add(User.of("Admin", "admin", Stream.of(Role.ADMIN).collect(toSet())));
 		INITIAL_USERS.add(User.of("User1", "user1", Stream.of(Role.PAGE_1).collect(toSet())));
-		INITIAL_USERS.add(User.of("User2", "user1", Stream.of(Role.PAGE_2).collect(toSet())));
-		INITIAL_USERS.add(User.of("User3", "user1", Stream.of(Role.PAGE_3).collect(toSet())));
+		INITIAL_USERS.add(User.of("User2", "user2", Stream.of(Role.PAGE_2).collect(toSet())));
+		INITIAL_USERS.add(User.of("User3", "user3", Stream.of(Role.PAGE_3).collect(toSet())));
 		INITIAL_USERS.add(User.of("User123", "user123", Stream.of(Role.PAGE_1, Role.PAGE_2, Role.PAGE_3).collect(toSet())));
 	}
 

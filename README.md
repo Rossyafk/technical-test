@@ -119,6 +119,14 @@ Tests use Junit, Mockito and Hamcrest.
 The method name of each test should give enough information to understand 
 what is being tested
 
+### Default users
+
+* User{id=1, name='Admin', password='admin', roles=[ADMIN]}
+* User{id=2, name='User1', password='user1', roles=[PAGE_1]}, 
+* User{id=3, name='User2', password='user2', roles=[PAGE_2]}, 
+* User{id=4, name='User3', password='user3', roles=[PAGE_3]}, 
+* User{id=5, name='User123', password='user123', roles=[PAGE_3, PAGE_1, PAGE_2]}]
+
 ## Improvements
 
 * Finish Views related to Roles from PAGE_1 to PAGE_3
