@@ -100,6 +100,13 @@ decision diagram:
 * DELETE /api/users/{id}
  `curl -v -u Admin:admin -X DELETE localhost:8000/api/users/5`
 
+## Views
+
+This part of the app is currently unfinished, the only part that can be 
+accessed if the login page:
+
+ `/views/public/login`
+
 ## Tests
 
 The project contains unit and integration test:

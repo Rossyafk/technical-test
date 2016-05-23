@@ -87,14 +87,14 @@ public class HttpServerApp {
 		FrontHandler frontHandlerRest = new FrontHandler(restHandlerMappings);
 
 		Map<Pattern, HttpHandler> viewHandlerMappings = new HashMap<>();
-		viewHandlerMappings.put(LoginHandler.URL_PATTERN, usersHandler);
+		viewHandlerMappings.put(LoginHandler.URL_PATTERN, loginHandler);
 		FrontHandler frontHandlerView = new FrontHandler(viewHandlerMappings);
 
 		// Initialization
 		INITIAL_USERS.replaceAll(userRepository::save);
 
 		server.createContext("/api", frontHandlerRest).setAuthenticator(restAuthenticator);
-		server.createContext("/views/public/login", loginHandler);
+		server.createContext("/views", frontHandlerView);
 		server.setExecutor(Executors.newCachedThreadPool());
 	}
 
